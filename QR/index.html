@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Number plate Processing AI</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv='cache-control' content='no-cache'>
+  <meta http-equiv='expires' content='0'>
+  <meta http-equiv='pragma' content='no-cache'>
+  <link rel="manifest" href="manifest.json" />
+  <!-- ios support -->
+  <link rel="apple-touch-icon" href="assets/icons/icon-72x72.png" />
+  <link rel="apple-touch-icon" href="assets/icons/icon-96x96.png" />
+  <link rel="apple-touch-icon" href="assets/icons/icon-128x128.png" />
+  <link rel="apple-touch-icon" href="assets/icons/icon-144x144.png" />
+  <link rel="apple-touch-icon" href="assets/icons/icon-152x152.png" />
+  <link rel="apple-touch-icon" href="assets/icons/icon-192x192.png" />
+  <link rel="apple-touch-icon" href="assets/icons/icon-384x384.png" />
+  <link rel="apple-touch-icon" href="assets/icons/icon-512x512.png" />
+  <meta name="apple-mobile-web-app-status-bar" content="#db4938" />
+  <meta name="theme-color" content="#db4938" />
+  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <script src="https://hammerjs.github.io/dist/hammer.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"
+    integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script> -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tflite@0.0.1-alpha.3/dist/tf-tflite.min.js"></script> -->
+
+  <!-- <script src="./assets/JS/tfjs-core.js"></script>
+  <script src="./assets/JS/tfjs-backend-cpu.js"></script>
+  <script src="./assets/JS/tf-tflite.min.js"></script> -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-cpu"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tflite/dist/tf-tflite.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script type="text/javascript" src="./assets/JS/jsQrCode/grid.js"></script>
+  <script type="text/javascript" src="./assets/JS/jsQrCode/version.js"></script>
+  <script type="text/javascript" src="./assets/JS/jsQrCode/detector.js"></script>
+  <script type="text/javascript" src="./assets/JS/jsQrCode/formatinf.js"></script>
+  <script type="text/javascript" src="./assets/JS/jsQrCode/errorlevel.js"></script>
+  <script type="text/javascript" src="./assets/JS/jsQrCode/bitmat.js"></script>
+  <script type="text/javascript" src="./assets/JS/jsQrCode/datablock.js"></script>
+  <script type="text/javascript" src="./assets/JS/jsQrCode/bmparser.js"></script>
+  <script type="text/javascript" src="./assets/JS/jsQrCode/datamask.js"></script>
+  <script type="text/javascript" src="./assets/JS/jsQrCode/rsdecoder.js"></script>
+  <script type="text/javascript" src="./assets/JS/jsQrCode/gf256poly.js"></script>
+  <script type="text/javascript" src="./assets/JS/jsQrCode/gf256.js"></script>
+  <script type="text/javascript" src="./assets/JS/jsQrCode/decoder.js"></script>
+  <script type="text/javascript" src="./assets/JS/jsQrCode/qrcode.js"></script>
+  <script type="text/javascript" src="./assets/JS/jsQrCode/findpat.js"></script>
+  <script type="text/javascript" src="./assets/JS/jsQrCode/alignpat.js"></script>
+  <script type="text/javascript" src="./assets/JS/jsQrCode/databr.js"></script>
+  <script type="text/javascript" src="./assets/JS/jsQrCode/"></script>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+  <style>
+    *,
+    *:before,
+    *:after {
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      background: #f1f6f7;
+      /* overflow: hidden; */
+      font-family: sans-serif;
+    }
+
+    .tinder {
+      width: 100vw;
+      height: 80vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      opacity: 0;
+      transition: opacity 0.1s ease-in-out;
+    }
+
+    .loaded.tinder {
+      opacity: 1;
+      /* display: flex; */
+    }
+
+    .tinder--status {
+      position: absolute;
+      top: 50%;
+      margin-top: -30px;
+      z-index: 2;
+      width: 100%;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .tinder--status i {
+      font-size: 100px;
+      opacity: 0;
+      transform: scale(0.3);
+      transition: all 0.2s ease-in-out;
+      position: absolute;
+      width: 100px;
+      margin-left: -50px;
+    }
+
+    .tinder_love .fa-check {
+      opacity: 0.7;
+      transform: scale(1);
+    }
+
+    .tinder_nope .fa-remove {
+      opacity: 0.7;
+      transform: scale(1);
+    }
+
+    .tinder--cards {
+      flex-grow: 1;
+      padding-top: 0px;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      /* align-items: center; */
+      align-items: flex-end;
+      z-index: 1;
+    }
+
+    .tinder--card {
+      display: inline-block;
+      width: 90vw;
+      max-width: 400px;
+      height: 50vh;
+      background: #FFFFFF;
+      padding-bottom: 20px;
+      border-radius: 8px;
+      overflow: hidden;
+      position: absolute;
+      will-change: transform;
+      transition: all 0.3s ease-in-out;
+      cursor: -webkit-grab;
+      cursor: -moz-grab;
+      cursor: grab;
+    }
+
+    .moving.tinder--card {
+      transition: none;
+      cursor: -webkit-grabbing;
+      cursor: -moz-grabbing;
+      cursor: grabbing;
+    }
+
+    .tinder--card img {
+      max-width: 100%;
+      pointer-events: none;
+    }
+
+    .tinder--card h3 {
+      margin-top: 32px;
+      font-size: 32px;
+      padding: 0 16px;
+      pointer-events: none;
+    }
+
+    .tinder--card p {
+      margin-top: 24px;
+      font-size: 20px;
+      padding: 0 16px;
+      pointer-events: none;
+    }
+
+    .tinder--buttons {
+      flex: 0 0 100px;
+      text-align: center;
+      padding-top: 20px;
+      /* display: none; */
+      position: relative;
+      z-index: 111;
+    }
+
+    .tinder--buttons button {
+      border-radius: 50%;
+      line-height: 60px;
+      width: 60px;
+      border: 0;
+      background: #FFFFFF;
+      display: inline-block;
+      margin: 0 8px;
+    }
+
+    .tinder--buttons button:focus {
+      outline: 0;
+    }
+
+    .tinder--buttons i {
+      font-size: 32px;
+      vertical-align: middle;
+    }
+
+    .fa-check {
+      color: green;
+    }
+
+    .fa-remove {
+      color: red;
+    }
+
+    .fa-sign-out {
+      font-size: 1.75em;
+    }
+
+    .auth-container {
+      border-bottom: 1px;
+      border-radius: 20px;
+      margin: 20px 10px 0px;
+      padding: 10px;
+    }
+
+    .auth-container h1 {
+      font-size: 30px;
+      line-height: 40px;
+      margin: 0;
+    }
+
+    #signout_button {
+      font-size: 14px;
+      display: block;
+      margin: 0 !important;
+      float: right;
+    }
+
+    .submit-btn {
+      align-items: center;
+      text-align: center;
+    }
+
+    .table-responsive {
+      height: calc(100vh - 40px - 133px - 66px);
+    }
+
+    .table-responsive table.table {
+      min-width: 380px;
+      height: calc(100vh - 40px - 133px - 66px);
+      position: relative;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      margin-bottom: 0px;
+    }
+
+    .table-responsive table.table thead {
+      position: sticky;
+      position: -webkit-sticky;
+      top: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      overflow: hidden;
+    }
+
+    table td,
+    table th {
+      border-top: 1px solid #ecf0f1;
+      padding: 10px;
+    }
+
+    table td,
+    table th {
+      border-left: 1px solid #ecf0f1;
+      border-right: 1px solid #ecf0f1;
+      vertical-align: middle;
+    }
+
+    table th {
+      background-color: #46637f !important;
+      vertical-align: middle;
+      color: #fff;
+      text-align: left;
+    }
+
+    table .total th {
+      background-color: white;
+    }
+
+    table .total td {
+      text-align: right;
+      font-weight: 700;
+    }
+
+    .main-container.login {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .main-container.login .tinder {
+      display: none;
+    }
+
+    .present-student {
+      background-color: #b6dda3;
+    }
+
+    .absent-student {
+      background-color: #d5b8b8;
+    }
+
+    .student-table {
+      padding: 20px 20px;
+    }
+
+    .form-select,
+    .form-select option {
+      text-transform: capitalize;
+    }
+
+    .tflite-test {
+      height: calc(100vh - 133px);
+      overflow: auto;
+    }
+
+    .camera-btn {
+      display: table;
+      margin: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="main-container login">
+    <div class="auth-container">
+      <button id="signout_button" style="display: none;" type="button"
+        class="m-0 mt-1 btn btn-primary float-right mx-auto"><i class="fa fa-sign-out"></i></i>
+      </button>
+      <h1 style="font-family: system-ui;">Vehicle Number Plate Recognition</h1>
+      <div class="row gx-2" style="margin-top: 15px;">
+        <div class="col">
+          <select onchange="fetchClassWiseData()" style="display: none;" id="classOption"
+            class="form-select classOption">
+            <option selected disabled value="">Standard</option>
+          </select>
+        </div>
+        <div class="col">
+          <select onchange="fetchClassWiseData()" style="display: none;" id="divOption" class="form-select divOption">
+            <option selected disabled value="">Division</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: none;" id="authorize_button">
+        <a class="btn btn-outline-dark" role="button" style="text-transform:none">
+          <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in"
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" />
+          Login with Google
+        </a>
+      </div>
+    </div>
+    <!-- <div class="tinder">
+      <div class="tinder--status">
+        <i class="fa fa-remove"></i>
+        <i class="fa fa-check"></i>
+      </div>
+
+      <div class="tinder--cards">
+
+      </div>
+
+      <div class="tinder--buttons">
+        <button id="nope"><i class="fa fa-remove"></i></button>
+        <button id="love"><i class="fa fa-check"></i></button>
+      </div>
+    </div> -->
+
+    <div class="tflite-test">
+      <main id="camera">
+        <canvas style='max-width: 1280px; max-height: 720px; width: 100%;' id="camera--sensor"></canvas>
+        <video style='width: 1080; height: 720;' id="camera--view" autoplay playsinline></video>
+        <!-- <img style='width: 320px; height: 320px;' src="//:0" alt="" id="camera--output"> -->
+        <!-- <canvas style="max-width: 100%;" id="camera--sensor"></canvas>
+        <video style="max-width: 100%;" id="camera--view" autoplay playsinline></video>
+        <img style="max-width: 100%;" src="//:0" alt="" id="camera--output"> -->
+        <div class="camera-btn">
+          <button id="camera_trigger">Start Camera</button>
+          <div id="myDIV"></div>
+          <button id="click_image">Take a picture</button>
+          <button id="saveAllData">Save all</button> 
+          <button style="display: none;" id="attendance-list-btn">Show plate Number</button>
+        </div>
+      </main>
+    </div>
+
+    <div class="student-table" style="display: none;">
+      <div class="table-responsive">
+        <table class="table table-borderless">
+          <thead>
+            <tr class="table-heading">
+              <th scope="col">Roll No</th>
+              <th scope="col">Student Name</th>
+              <th scope="col">Attendance</th>
+            </tr>
+          </thead>
+          <tbody class="students-row">
+          </tbody>
+        </table>
+      </div>
+      <div class="mt-2 submit-btn">
+        <button onclick="submitAttendance()" type="button" style="margin-top: 20px !important;"
+          class="btn btn-primary align-self-center mx-auto">Submit
+          Attendance</button>
+      </div>
+    </div>
+
+    <pre id="content" style="white-space: pre-wrap;"></pre>
+  </div>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script defer src="https://apis.google.com/js/api.js" onload="this.onload=function(){};handleClientLoad()"
+  onreadystatechange="if (this.readyState === 'complete') this.onload()">
+  </script>
+
+<script type="text/javascript">
+
+</script>
+
+<script src="./js/app.js"></script>
+
+</script>
+
+</html>
