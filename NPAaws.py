@@ -96,7 +96,7 @@ def getFrame(sec):
     video.set(cv2.CAP_PROP_POS_MSEC,sec*1000) 
     return video.read() 
 sec = 0 
-frameRate = 0.25                                #  4 frames per second
+frameRate = 0.1                               #  10 frames per second
 success = getFrame(sec) 
 
 while success:     
@@ -105,7 +105,7 @@ while success:
     sec = round(sec, 2)   
     ret, frame = getFrame(sec) 
     seco = (str(sec)).replace('.', '_')
-    tlist = []
+    cv2.imwrite('bike/20220531141406/frames/'+str(seco)+'.jpg',frame)   
     
     if not ret:
         break
@@ -136,9 +136,10 @@ while success:
                 
     l = len(sheet.col_values(1)) 
     l += 1
+    tlist = []
+    
     for i in range(len(scores)):
-        if ((scores[i] > min_conf_threshold) and (scores[i] <= 1.0)):
-
+        if ((scores[i] > min_conf_threshold) and (scores[i] <= 1.0)):  
             # Get bounding box coordinates and draw box
             # Interpreter can return coordinates that are outside of image dimensions, need to force them to be within image using max() and min()
             ymin = int(max(1,(boxes[i][0] * imH)))
@@ -147,24 +148,38 @@ while success:
             xmax = int(min(imW,(boxes[i][3] * imW)))
             
             vid = cv2.rectangle(frame, (xmin,ymin), (xmax,ymax), (10, 255, 0), 4)
+            cv2.imwrite('bike/20220531141406/box/'+str(seco)+'.jpg',vid)
             crop = vid[ymin:ymax, xmin:xmax]
-            path = "crop/"+str(seco)+'.jpg'
+            path = "bike/20220531141406/crop/"+str(seco)+'.jpg'
             cv2.imwrite(path,crop)  
-                    
+
             imageSource=open(path,'rb')
             print(imageSource)
             response=client.detect_text(Image={'Bytes': imageSource.read()})
-            textDetections = response['TextDetections']
+            textDetections=response['TextDetections']
             print ('Detected text\n----------')
+            nm = []
             for text in textDetections:
-                print ('Detected text:' + text['DetectedText'])
-                txt = text['DetectedText'] if 'Id' in text else print("not line")
-                # t = bool(re.search(r'^[a-zA-Z]{2}',text['DetectedText']))
+                txt = text['DetectedText']
+                print ('Detected text: ' + txt)
+                # t = bool(re.search(r'^[A-Z]',txt))
                 r = bool(re.search(r'\d{4}$',txt))
-                if r and text['Type']=='LINE':
-                    tlist.append(txt)
-                    print("temporary list]]]]]]]]]]]]]]]] ", tlist)
+                if 'J' in txt or r and 'Id' in text: 
+                    if text['Type']=='LINE':
+                        nm.append(txt)
+                        print("]]]]]]]]]]]]]]]] ", nm)
+            if len(nm)==1:
+                tlist = nm
+                print("car Number plate Recognised:  ", tlist)
+            elif len(nm)>=1:
+                n = str(nm[0])+str(nm[1])
+                tlist.append(n)
+                print('bike Number plate Recognised:  ', tlist)
+            else:
+                print("Not Reconised but Detected............!!!")
+                pass
+                    
     if len(tlist)>0:
         tlist.insert(0,str(date_time_obj + datetime.timedelta(seconds=Full_TIme[0],minutes=Full_TIme[1],hours=Full_TIme[1])))
         print("tlist :::::::::",tlist)
-        sheet.update('A'+str(l),[tlist]
+        sheet.update('A'+str(l),[tlist])
